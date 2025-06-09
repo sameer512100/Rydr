@@ -29,7 +29,7 @@ Send a JSON object with the following structure:
 
 ### Responses
 
-- **200 Created**
+- **201 Created**
   - **Description:** User registered successfully.
   - **Body:**
     ```json
@@ -127,6 +127,102 @@ Send a JSON object with the following structure:
     ```json
     {
       "error": "Invalid email or password"
+    }
+    ```
+
+- **500 Internal Server Error**
+  - **Description:** Server error.
+
+---
+
+## GET `/users/profile`
+
+### Description
+Returns the authenticated user's profile. Requires authentication via JWT token (sent as a cookie or in the `Authorization: Bearer <token>` header).
+
+### Headers
+
+- `Authorization: Bearer <jwt>` (optional if cookie is used)
+
+### Responses
+
+- **200 OK**
+  - **Description:** Returns the user's profile.
+  - **Body:**
+    ```json
+    {
+      "user": {
+        "_id": "user_id",
+        "fullname": {
+          "firstname": "John",
+          "lastname": "Doe"
+        },
+        "email": "john.doe@example.com"
+      }
+    }
+    ```
+
+- **401 Unauthorized**
+  - **Description:** Missing or invalid token, or user not found.
+  - **Body:**
+    ```json
+    {
+      "error": "Authentication token is missing"
+    }
+    ```
+    or
+    ```json
+    {
+      "error": "User not found"
+    }
+    ```
+    or
+    ```json
+    {
+      "message": "unauthorized access"
+    }
+    ```
+
+---
+
+## GET `/users/logout`
+
+### Description
+Logs out the authenticated user by blacklisting the current JWT token and clearing the authentication cookie. Requires authentication.
+
+### Headers
+
+- `Authorization: Bearer <jwt>` (optional if cookie is used)
+
+### Responses
+
+- **200 OK**
+  - **Description:** User logged out successfully.
+  - **Body:**
+    ```json
+    {
+      "message": "Logged out successfully"
+    }
+    ```
+
+- **401 Unauthorized**
+  - **Description:** Missing or invalid token, or token is blacklisted.
+  - **Body:**
+    ```json
+    {
+      "error": "Authentication token is missing"
+    }
+    ```
+    or
+    ```json
+    {
+      "error": "Token is blacklisted"
+    }
+    ```
+    or
+    ```json
+    {
+      "message": "unauthorized access"
     }
     ```
 
