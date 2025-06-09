@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-const userRoutes = require('./routes/userR'); // Assuming you have a routes file
+const userRoutes = require('./routes/userR');
+const cookieParser = require('cookie-parser');
 dotenv.config();
 
 const app = express();
@@ -11,6 +12,7 @@ const app = express();
 app.use(cors());
 app.use(express.json()); // Replaces body-parser
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser()); // For parsing cookies
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/mydatabase')
