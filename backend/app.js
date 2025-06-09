@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/userR');
+const captainRoutes = require('./routes/captainR'); // Assuming you have captain routes defined in captainR.js
 const cookieParser = require('cookie-parser');
 dotenv.config();
 
@@ -31,7 +32,7 @@ app.get('/', (req, res) => {
 // User routes
 
 app.use('/users',userRoutes); // Assuming you have user routes defined in userR.js
-
+app.use('/captains', captainRoutes); // Assuming you have captain routes defined in captainR.js
 
 
 

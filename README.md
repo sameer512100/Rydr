@@ -1,4 +1,6 @@
-# BACKEND API  Documentation
+# BACKEND API Documentation
+
+---
 
 ## POST `/users/register`
 
@@ -6,8 +8,6 @@
 Registers a new user in the system. On success, returns a JWT token and the created user object.
 
 ### Request Body
-
-Send a JSON object with the following structure:
 
 ```json
 {
@@ -72,8 +72,6 @@ Send a JSON object with the following structure:
 Authenticates a user using email and password. Returns a JWT token and the user object on success.
 
 ### Request Body
-
-Send a JSON object with the following structure:
 
 ```json
 {
@@ -228,5 +226,91 @@ Logs out the authenticated user by blacklisting the current JWT token and cleari
 
 - **500 Internal Server Error**
   - **Description:** Server error.
+
+---
+
+## POST `/captains/register`
+
+### Description
+Registers a new captain (driver) in the system. On success, returns a JWT token and the created captain object.
+
+### Request Body
+
+```json
+{
+  "fullname": {
+    "firstname": "Jane",
+    "lastname": "Smith"
+  },
+  "email": "jane.smith@example.com",
+  "password": "yourpassword",
+  "vehicle": {
+    "color": "Red",
+    "plate": "ABC123",
+    "capacity": 4,
+    "vehicleType": "car"
+  }
+}
+```
+
+#### Field Requirements
+
+- `fullname.firstname` (string, required): Minimum 3 characters.
+- `fullname.lastname` (string, required): Minimum 3 characters.
+- `email` (string, required): Must be a valid email address.
+- `password` (string, required): Minimum 6 characters.
+- `vehicle.color` (string, required): Minimum 3 characters.
+- `vehicle.plate` (string, required): Minimum 3 characters.
+- `vehicle.capacity` (integer, required): Must be at least 1.
+- `vehicle.vehicleType` (string, required): Must be one of `car`, `auto`, or `motorcycle`.
+
+### Responses
+
+- **201 Created**
+  - **Description:** Captain registered successfully.
+  - **Body:**
+    ```json
+    {
+      "token": "<jwt>",
+      "captain": {
+        "_id": "captain_id",
+        "fullname": {
+          "firstname": "Jane",
+          "lastname": "Smith"
+        },
+        "email": "jane.smith@example.com",
+        "vehicle": {
+          "color": "Red",
+          "plate": "ABC123",
+          "capacity": 4,
+          "vehicleType": "car"
+        }
+      }
+    }
+    ```
+
+- **400 Bad Request**
+  - **Description:** Validation failed or captain already exists.
+  - **Body:**
+    ```json
+    {
+      "errors": [
+        {
+          "msg": "Error message",
+          "param": "field",
+          "location": "body"
+        }
+      ]
+    }
+    ```
+    or
+    ```json
+    {
+      "error": "Captain already exists"
+    }
+    ```
+
+- **500 Internal Server Error**
+  - **Description:** Server error or missing required fields.
 
 ---
