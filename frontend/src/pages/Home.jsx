@@ -6,6 +6,7 @@ import LocationSearchPanel from "../components/LocationSearchPanel";
 import VehicleP from "../components/vehicleP";
 import ConfirmRide from "../components/ConfirmRide";
 import Lookd from '../components/Lookd'
+import WaitD from "../components/WaitD";
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
@@ -20,10 +21,12 @@ const Home = () => {
 
   const [ConfirmRidePanel, setConfirmRidePanel] = useState(false);
   const [VehicleFound, setVehicleFound] = useState(false)
+  const [waitingForDriver, setwaitingForDriver] = useState(false)
 
   const vehiclePanelRef = useRef(null);
   const ConfirmRidePanelRef = useRef(null);
   const vehicleFoundRef = useRef(null)
+  const watingForDriverRef = useRef(null);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -101,10 +104,24 @@ const Home = () => {
     [ConfirmRidePanel]
   );
 
+  useGSAP(
+    function () {
+      if (waitingForDriver) {
+        gsap.to(watingForDriverRef.current, {
+          transform: "translateY(0)",
+        });
+      } else {
+        gsap.to(watingForDriverRef.current, {
+          transform: "translateY(100%)",
+        });
+      }
+    },
+    [waitingForDriver]
+  );
+
 
 
   return (
-    
     <div className="h-screen relative overflow-hidden">
       <img
         className="w-16 absolute left-5 top-5"
@@ -184,14 +201,24 @@ const Home = () => {
         ref={ConfirmRidePanelRef}
         className="fixed  w-full z-10 bottom-0 translate-y-full bg-white py-6 px-3 pt-12"
       >
-        <ConfirmRide setConfirmRidePanel={setConfirmRidePanel} setVehicleFound={setVehicleFound} />
+        <ConfirmRide
+          setConfirmRidePanel={setConfirmRidePanel}
+          setVehicleFound={setVehicleFound}
+        />
       </div>
 
       <div
         ref={vehicleFoundRef}
         className="fixed  w-full z-10 bottom-0 translate-y-full bg-white py-6 px-3 pt-12"
       >
-        <Lookd/>
+        <Lookd setVehicleFound={setVehicleFound} />
+      </div>
+
+      <div
+      ref={watingForDriverRef}
+        className="fixed  w-full z-10 bottom-0  bg-white py-6 px-3 pt-12"
+      >
+        <WaitD waitingForDriver={waitingForDriver}  />
       </div>
     </div>
   );

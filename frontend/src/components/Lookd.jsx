@@ -5,7 +5,7 @@ const Lookd = (props) => {
     <div>
       <h5
         onClick={() => {
-          props.setconfirmRidePanel(false);
+          props.setVehicleFound(false);
         }}
         className="p-1 text-center w-[92%] absolute top-0"
       >
