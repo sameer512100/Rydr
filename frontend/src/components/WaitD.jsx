@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 
 const WaitD = (props) => {
   return (
@@ -12,12 +12,15 @@ const WaitD = (props) => {
         <i className="text-3xl text-gray-200 ri-arrow-down-wide-fill"></i>
       </h5>
 
-      <div className='flex items-center justify-between'>
-        <img className='h-12 ' src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_538,w_956/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png"/>
-        <div className='text-right'>
-          <h2 className='text-lg font-medium '>Sameer</h2>
-          <h4 className='text-xl font-semibold -mt-1 -mb-1'>AP16 AW 4647</h4>
-          <p className='tex-sm text-gray-600'>WagonR</p>
+      <div className="flex items-center justify-between">
+        <img
+          className="h-12 "
+          src="https://www.uber-assets.com/image/upload/f_auto,q_auto:eco,c_fill,h_538,w_956/v1688398971/assets/29/fbb8b0-75b1-4e2a-8533-3a364e7042fa/original/UberSelect-White.png"
+        />
+        <div className="text-right">
+          <h2 className="text-lg font-medium ">Sameer</h2>
+          <h4 className="text-xl font-semibold -mt-1 -mb-1">AP16 AW 4647</h4>
+          <p className="tex-sm text-gray-600">WagonR</p>
         </div>
       </div>
 
@@ -52,6 +55,6 @@ const WaitD = (props) => {
       </div>
     </div>
   );
-}
+};
 
-export default WaitD
+export default WaitD;
