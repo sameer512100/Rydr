@@ -3,15 +3,23 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import "remixicon/fonts/remixicon.css";
 import LocationSearchPanel from "../components/LocationSearchPanel";
-import VehicleP from "../components/vehicleP";
+import VehicleP from "../components/VehicleP"
 import ConfirmRide from "../components/ConfirmRide";
-import Lookd from '../components/Lookd'
+import Lookd from "../components/Lookd";
 import WaitD from "../components/WaitD";
+import axios from "axios";
+
+const API_BASE = import.meta.env.VITE_BASE_URL;
+
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
   const [panelOpen, setpanelOpen] = useState(false);
+
+  const [searchType, setSearchType] = useState(null); // "pickup" or "destination"
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   const panelRef = useRef(null);
 
@@ -20,16 +28,94 @@ const Home = () => {
   const [vehiclePanel, setvehiclePanel] = useState(false);
 
   const [ConfirmRidePanel, setConfirmRidePanel] = useState(false);
-  const [VehicleFound, setVehicleFound] = useState(false)
-  const [waitingForDriver, setwaitingForDriver] = useState(false)
+  const [VehicleFound, setVehicleFound] = useState(false);
+  const [waitingForDriver, setwaitingForDriver] = useState(false);
 
   const vehiclePanelRef = useRef(null);
   const ConfirmRidePanelRef = useRef(null);
-  const vehicleFoundRef = useRef(null)
+  const vehicleFoundRef = useRef(null);
   const watingForDriverRef = useRef(null);
+
+  const [fares, setFares] = useState(null);
+  const [fetchingFares, setFetchingFares] = useState(false);
+
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
+
+  // In Home.jsx
+  const fetchFares = async () => {
+    if (!pickup || !destination) {
+      console.log("Pickup or destination missing");
+      return;
+    }
+    setFetchingFares(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        `${API_BASE}/rides/get-fares`,
+        { pickup, destination },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setFares(res.data);
+    } catch (err) {
+      setFares(null);
+    }
+    setFetchingFares(false);
+  };
+
+  function findTripClick() {
+    setpanelOpen(false);
+    setvehiclePanel(true);
+    fetchFares(); // Fetch fares when opening vehicle panel
+  }
 
   const submitHandler = (e) => {
     e.preventDefault();
+  };
+
+
+  // Fetch suggestions from backend
+  const fetchSuggestions = async (input) => {
+    if (!input || input.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+
+    setLoadingSuggestions(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `${API_BASE}/maps/get-suggestions?input=${encodeURIComponent(input)}`,
+        {
+          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setSuggestions(res.data.map((s) => s.description));
+    } catch (err) {
+      setSuggestions([]);
+    }
+    setLoadingSuggestions(false);
+  };
+
+  // Handle input changes
+  const handleInputChange = (type, value) => {
+    if (type === "pickup") setPickup(value);
+    else setDestination(value);
+    setSearchType(type);
+    setpanelOpen(true);
+    fetchSuggestions(value);
+  };
+
+  // Handle suggestion click
+  const handleSuggestionClick = (suggestion) => {
+    if (searchType === "pickup") setPickup(suggestion);
+    else setDestination(suggestion);
+
+    setSuggestions([]);
   };
 
   useGSAP(
@@ -38,7 +124,6 @@ const Home = () => {
         gsap.to(panelRef.current, {
           height: "70%",
           padding: 24,
-          // opacity:1
         });
         gsap.to(panelCloseRef.current, {
           opacity: 1,
@@ -47,7 +132,6 @@ const Home = () => {
         gsap.to(panelRef.current, {
           height: "0%",
           padding: 0,
-          // opacity:0
         });
         gsap.to(panelCloseRef.current, {
           opacity: 0,
@@ -87,8 +171,6 @@ const Home = () => {
     [vehiclePanel]
   );
 
-
-
   useGSAP(
     function () {
       if (ConfirmRidePanel) {
@@ -118,8 +200,6 @@ const Home = () => {
     },
     [waitingForDriver]
   );
-
-
 
   return (
     <div className="h-screen relative overflow-hidden">
@@ -162,25 +242,42 @@ const Home = () => {
           >
             <div className="line absolute h-16 w-1 top-[45%] left-10 bg-gray-900 rounded-full"></div>
             <input
-              onClick={() => setpanelOpen(true)}
+              onClick={() => {
+                setpanelOpen(true);
+                setSearchType("pickup");
+                fetchSuggestions(pickup);
+              }}
               value={pickup}
-              onChange={(e) => setPickup(e.target.value)}
+              onChange={(e) => handleInputChange("pickup", e.target.value)}
               className="bg-[#eee] px-8 py-2 text-lg rounded-lg w-full mt-5"
               type="text"
               placeholder="Add a pick-up location"
             />
             <input
-              onClick={() => setpanelOpen(true)}
+              onClick={() => {
+                setpanelOpen(true);
+                setSearchType("destination");
+                fetchSuggestions(destination);
+              }}
               value={destination}
-              onChange={(e) => setDestination(e.target.value)}
+              onChange={(e) => handleInputChange("destination", e.target.value)}
               className="bg-[#eee] px-8 py-2 text-lg rounded-lg w-full mt-3"
               type="text"
               placeholder="Enter your destination"
             />
           </form>
+          <button
+            onClick={findTripClick}
+            className="mt-2 w-full mx-auto block bg-black text-white py-2 px-8 rounded-lg text-base font-semibold hover:bg-gray-900 transition-colors duration-200"
+          >
+            Search
+          </button>
         </div>
-        <div ref={panelRef} className=" bg-white  h-0 ">
+        <div ref={panelRef} className="bg-white">
           <LocationSearchPanel
+            suggestions={suggestions}
+            loading={loadingSuggestions}
+            onSuggestionClick={handleSuggestionClick}
             setpanelOpen={setpanelOpen}
             setvehiclePanel={setvehiclePanel}
           />
@@ -189,36 +286,43 @@ const Home = () => {
 
       <div
         ref={vehiclePanelRef}
-        className="fixed  w-full z-10 bottom-0 translate-y-full bg-white py-10 px-3 pt-12"
+        className="fixed w-full z-10 bottom-0 bg-white py-10 px-3 pt-12"
       >
         <VehicleP
           setConfirmRidePanel={setConfirmRidePanel}
           setvehiclePanel={setvehiclePanel}
+          fares={fares}
+          fetchingFares={fetchingFares}
+          setSelectedVehicle={setSelectedVehicle}
         />
       </div>
 
       <div
         ref={ConfirmRidePanelRef}
-        className="fixed  w-full z-10 bottom-0 translate-y-full bg-white py-6 px-3 pt-12"
+        className="fixed w-full z-10 bottom-0 bg-white py-6 px-3 pt-12"
       >
         <ConfirmRide
           setConfirmRidePanel={setConfirmRidePanel}
           setVehicleFound={setVehicleFound}
+          pickup={pickup}
+          destination={destination}
+          selectedVehicle={selectedVehicle}
+          fares={fares}
         />
       </div>
 
       <div
         ref={vehicleFoundRef}
-        className="fixed  w-full z-10 bottom-0 translate-y-full bg-white py-6 px-3 pt-12"
+        className="fixed w-full z-10 bottom-0 bg-white py-6 px-3 pt-12"
       >
         <Lookd setVehicleFound={setVehicleFound} />
       </div>
 
       <div
-      ref={watingForDriverRef}
-        className="fixed  w-full z-10 bottom-0  bg-white py-6 px-3 pt-12"
+        ref={watingForDriverRef}
+        className="fixed w-full z-10 bottom-0 bg-white py-6 px-3 pt-12"
       >
-        <WaitD waitingForDriver={waitingForDriver}  />
+        <WaitD waitingForDriver={waitingForDriver} />
       </div>
     </div>
   );

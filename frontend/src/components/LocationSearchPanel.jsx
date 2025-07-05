@@ -1,32 +1,28 @@
 import React from "react";
 
-const LocationSearchPanel = (props) => {
-  const locations = [
-    "24A, near Kapoor's cafe",
-    "24B, near sameer's cafe",
-    "24C, near ok's cafe",
-    "24D, near hm's cafe",
-  ];
-
+const LocationSearchPanel = ({
+  suggestions = [],
+  loading,
+  onSuggestionClick,
+}) => {
   return (
     <div>
-      {locations.map(function (elem, idx) {
-        return (
-          <div
-            key={idx}
-            onClick={() => {
-              props.setvehiclePanel(true);
-              props.setpanelOpen(false);
-            }}
-            className="flex gap-4  border-2 p-3 border-gray-50 active:border-black rounded-xl  items-center justify-start my-2"
-          >
-            <h2 className="bg-[#eee] h-8 w-8 flex items-center justify-center rounded-full">
-              <i className="ri-map-pin-fill text-xl"></i>
-            </h2>
-            <h4 className="text-lg font-medium">{elem}</h4>
-          </div>
-        );
-      })}
+      {loading && <div className="p-4 text-gray-500">Loading...</div>}
+      {!loading && suggestions.length === 0 && (
+        <div className="p-4 text-gray-400">No suggestions</div>
+      )}
+      {suggestions.map((elem, idx) => (
+        <div
+          key={idx}
+          onClick={() => onSuggestionClick(elem)}
+          className="flex gap-4 border-2 p-3 border-gray-50 active:border-black rounded-xl items-center justify-start my-2 cursor-pointer"
+        >
+          <h2 className="bg-[#eee] h-8 w-8 flex items-center justify-center rounded-full">
+            <i className="ri-map-pin-fill text-xl"></i>
+          </h2>
+          <h4 className="text-lg font-medium">{elem}</h4>
+        </div>
+      ))}
     </div>
   );
 };
