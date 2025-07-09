@@ -8,6 +8,7 @@ const ConfirmRide = (props) => {
     destination,
     selectedVehicle,
     fares,
+    createRide, // Function to handle ride creation
   } = props;
 
   // Fallbacks if data is missing
@@ -17,6 +18,13 @@ const ConfirmRide = (props) => {
     fares && selectedVehicle && fares[selectedVehicle]
       ? fares[selectedVehicle].toFixed(2)
       : "--";
+
+  const handleConfirm = () => {
+    // Call createRide with the selected vehicle type
+    createRide(selectedVehicle);
+    setVehicleFound(true);
+    setConfirmRidePanel(false);
+  };
 
   return (
     <div>
@@ -65,10 +73,7 @@ const ConfirmRide = (props) => {
           </div>
         </div>
         <button
-          onClick={() => {
-            setVehicleFound(true);
-            setConfirmRidePanel(false);
-          }}
+          onClick={handleConfirm}
           className="w-full mt-5 bg-green-600 rounded-lg text-white font-semibold p-2"
         >
           Confirm

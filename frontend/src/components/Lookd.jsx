@@ -1,11 +1,17 @@
-import React from 'react'
+import React from "react";
 
-const Lookd = (props) => {
+const Lookd = ({
+  setVehicleFound,
+  pickup,
+  destination,
+  fare,
+  paymentType = "Cash",
+}) => {
   return (
     <div>
       <h5
         onClick={() => {
-          props.setVehicleFound(false);
+          setVehicleFound(false);
         }}
         className="p-1 text-center w-[92%] absolute top-0"
       >
@@ -23,32 +29,32 @@ const Lookd = (props) => {
           <div className="flex items-center gap-5 p-3 border-b-2">
             <i className="text-lg  ri-map-pin-2-fill"></i>
             <div>
-              <h3 className="text-lg font-medium">562/11-A</h3>
-              <p className="text-sm -mt-1 text-gray-600">
-                Kankariya Talab, Ahmedabad
-              </p>
+              <h3 className="text-lg font-medium">
+                {pickup || "Pickup location"}
+              </h3>
             </div>
           </div>
           <div className="flex items-center gap-5 p-3 border-b-2">
             <i className="text-lg  ri-map-pin-3-line"></i>
             <div>
-              <h3 className="text-lg font-medium">562/11-A</h3>
-              <p className="text-sm -mt-1 text-gray-600">
-                Kankariya Talab, Ahmedabad
-              </p>
+              <h3 className="text-lg font-medium">
+                {destination || "Destination"}
+              </h3>
             </div>
           </div>
           <div className="flex items-center gap-5 p-3">
             <i className="text-lg ri-currency-fill"></i>
             <div>
-              <h3 className="text-lg font-medium">₹119.69</h3>
-              <p className="text-sm -mt-1 text-gray-600">Cash</p>
+              <h3 className="text-lg font-medium">
+                ₹{fare !== undefined ? fare.toFixed(2) : "--"}
+              </h3>
+              <p className="text-sm -mt-1 text-gray-600">{paymentType}</p>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
-export default Lookd
+export default Lookd;

@@ -8,6 +8,12 @@ const VehicleP = (props) => {
     setvehiclePanel,
     setSelectedVehicle,
   } = props;
+
+  const handleVehicleClick = (vehicleType) => {
+    setSelectedVehicle(vehicleType);
+    setConfirmRidePanel(true);
+  };
+
   return (
     <div>
       <h5
@@ -23,10 +29,7 @@ const VehicleP = (props) => {
       {!fetchingFares && fares && (
         <>
           <div
-            onClick={() => {
-              setSelectedVehicle("car");
-              setConfirmRidePanel(true);
-            }}
+            onClick={() => handleVehicleClick("car")}
             className="flex border-2 hover:border-black mb-2 rounded-xl w-full p-3 items-center justify-between cursor-pointer transition hover:shadow-lg"
           >
             <img
@@ -51,10 +54,7 @@ const VehicleP = (props) => {
             </h2>
           </div>
           <div
-            onClick={() => {
-              setSelectedVehicle("motorcycle");
-              setConfirmRidePanel(true);
-            }}
+            onClick={() => handleVehicleClick("motorcycle")}
             className="flex border-2 hover:border-black mb-2 rounded-xl w-full p-3 items-center justify-between cursor-pointer transition hover:shadow-lg"
           >
             <img
@@ -79,10 +79,7 @@ const VehicleP = (props) => {
             </h2>
           </div>
           <div
-            onClick={() => {
-              setSelectedVehicle("auto");
-              setConfirmRidePanel(true);
-            }}
+            onClick={() => handleVehicleClick("auto")}
             className="flex border-2 hover:border-black mb-2 rounded-xl w-full p-3 items-center justify-between cursor-pointer transition hover:shadow-lg"
           >
             <img

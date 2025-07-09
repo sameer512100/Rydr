@@ -3,7 +3,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import "remixicon/fonts/remixicon.css";
 import LocationSearchPanel from "../components/LocationSearchPanel";
-import VehicleP from "../components/VehicleP"
+import VehicleP from "../components/VehicleP";
 import ConfirmRide from "../components/ConfirmRide";
 import Lookd from "../components/Lookd";
 import WaitD from "../components/WaitD";
@@ -11,22 +11,19 @@ import axios from "axios";
 
 const API_BASE = import.meta.env.VITE_BASE_URL;
 
-
 const Home = () => {
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
   const [panelOpen, setpanelOpen] = useState(false);
 
-  const [searchType, setSearchType] = useState(null); // "pickup" or "destination"
+  const [searchType, setSearchType] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   const panelRef = useRef(null);
-
   const panelCloseRef = useRef(null);
 
   const [vehiclePanel, setvehiclePanel] = useState(false);
-
   const [ConfirmRidePanel, setConfirmRidePanel] = useState(false);
   const [VehicleFound, setVehicleFound] = useState(false);
   const [waitingForDriver, setwaitingForDriver] = useState(false);
@@ -40,8 +37,9 @@ const Home = () => {
   const [fetchingFares, setFetchingFares] = useState(false);
 
   const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [rideDetails, setRideDetails] = useState(null);
 
-  // In Home.jsx
+  // Fetch fares from backend
   const fetchFares = async () => {
     if (!pickup || !destination) {
       console.log("Pickup or destination missing");
@@ -67,13 +65,12 @@ const Home = () => {
   function findTripClick() {
     setpanelOpen(false);
     setvehiclePanel(true);
-    fetchFares(); // Fetch fares when opening vehicle panel
+    fetchFares();
   }
 
   const submitHandler = (e) => {
     e.preventDefault();
   };
-
 
   // Fetch suggestions from backend
   const fetchSuggestions = async (input) => {
@@ -81,7 +78,6 @@ const Home = () => {
       setSuggestions([]);
       return;
     }
-
     setLoadingSuggestions(true);
     try {
       const token = localStorage.getItem("token");
@@ -114,97 +110,73 @@ const Home = () => {
   const handleSuggestionClick = (suggestion) => {
     if (searchType === "pickup") setPickup(suggestion);
     else setDestination(suggestion);
-
     setSuggestions([]);
   };
 
-  useGSAP(
-    function () {
-      if (panelOpen) {
-        gsap.to(panelRef.current, {
-          height: "70%",
-          padding: 24,
-        });
-        gsap.to(panelCloseRef.current, {
-          opacity: 1,
-        });
-      } else {
-        gsap.to(panelRef.current, {
-          height: "0%",
-          padding: 0,
-        });
-        gsap.to(panelCloseRef.current, {
-          opacity: 0,
-        });
-      }
-    },
-    [panelOpen]
-  );
+  // GSAP for search panel
+  useGSAP(() => {
+    if (panelOpen) {
+      gsap.to(panelRef.current, {
+        height: "70%",
+        padding: 24,
+      });
+      gsap.to(panelCloseRef.current, {
+        opacity: 1,
+      });
+    } else {
+      gsap.to(panelRef.current, {
+        height: "0%",
+        padding: 0,
+      });
+      gsap.to(panelCloseRef.current, {
+        opacity: 0,
+      });
+    }
+  }, [panelOpen]);
 
-  useGSAP(
-    function () {
-      if (VehicleFound) {
-        gsap.to(vehicleFoundRef.current, {
-          transform: "translateY(0)",
-        });
-      } else {
-        gsap.to(vehicleFoundRef.current, {
-          transform: "translateY(100%)",
-        });
-      }
-    },
-    [VehicleFound]
-  );
+  // Create ride and show Lookd panel
+  function createRide(vehicleType) {
+    if (!pickup || !destination || !vehicleType) {
+      console.log("Pickup, destination, or vehicle type missing");
+      return;
+    }
+    setConfirmRidePanel(true);
+    setvehiclePanel(false);
+    setSelectedVehicle(vehicleType);
 
-  useGSAP(
-    function () {
-      if (vehiclePanel) {
-        gsap.to(vehiclePanelRef.current, {
-          transform: "translateY(0)",
+    const token = localStorage.getItem("token");
+    axios
+      .post(
+        `${API_BASE}/rides/create`,
+        { pickup, destination, vehicleType },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      .then((res) => {
+        setRideDetails({
+          pickup: res.data.pickup,
+          destination: res.data.destination,
+          fare: res.data.fare,
+          paymentType: res.data.paymentType || "Cash",
         });
-      } else {
-        gsap.to(vehiclePanelRef.current, {
-          transform: "translateY(100%)",
-        });
-      }
-    },
-    [vehiclePanel]
-  );
+        setVehicleFound(true);
+        setConfirmRidePanel(false);
+      })
+      .catch((err) => {
+        console.error("Failed to create ride", err);
+        setConfirmRidePanel(false);
+      });
+  }
 
-  useGSAP(
-    function () {
-      if (ConfirmRidePanel) {
-        gsap.to(ConfirmRidePanelRef.current, {
-          transform: "translateY(0)",
-        });
-      } else {
-        gsap.to(ConfirmRidePanelRef.current, {
-          transform: "translateY(100%)",
-        });
-      }
-    },
-    [ConfirmRidePanel]
-  );
-
-  useGSAP(
-    function () {
-      if (waitingForDriver) {
-        gsap.to(watingForDriverRef.current, {
-          transform: "translateY(0)",
-        });
-      } else {
-        gsap.to(watingForDriverRef.current, {
-          transform: "translateY(100%)",
-        });
-      }
-    },
-    [waitingForDriver]
-  );
+  // Only one panel visible at a time
+  const showBackdrop =
+    vehiclePanel || ConfirmRidePanel || VehicleFound || waitingForDriver;
 
   return (
     <div className="h-screen relative overflow-hidden">
       <img
-        className="w-16 absolute left-5 top-5"
+        className="w-16 absolute left-5 top-5 z-40"
         src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Uber_logo_2018.svg/1200px-Uber_logo_2018.svg.png"
         alt=""
       />
@@ -223,7 +195,7 @@ const Home = () => {
         />
       </div>
 
-      <div className=" flex flex-col justify-end h-screen absolute top-0 w-full">
+      <div className="flex flex-col justify-end h-screen absolute top-0 w-full">
         <div className="h-[30%] p-6 bg-white relative">
           <h5
             ref={panelCloseRef}
@@ -284,46 +256,80 @@ const Home = () => {
         </div>
       </div>
 
-      <div
-        ref={vehiclePanelRef}
-        className="fixed w-full z-10 bottom-0 bg-white py-10 px-3 pt-12"
-      >
-        <VehicleP
-          setConfirmRidePanel={setConfirmRidePanel}
-          setvehiclePanel={setvehiclePanel}
-          fares={fares}
-          fetchingFares={fetchingFares}
-          setSelectedVehicle={setSelectedVehicle}
+      {/* Backdrop */}
+      {showBackdrop && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 z-20 transition-opacity duration-300"
+          onClick={() => {
+            setvehiclePanel(false);
+            setConfirmRidePanel(false);
+            setVehicleFound(false);
+            setwaitingForDriver(false);
+          }}
         />
-      </div>
+      )}
 
-      <div
-        ref={ConfirmRidePanelRef}
-        className="fixed w-full z-10 bottom-0 bg-white py-6 px-3 pt-12"
-      >
-        <ConfirmRide
-          setConfirmRidePanel={setConfirmRidePanel}
-          setVehicleFound={setVehicleFound}
-          pickup={pickup}
-          destination={destination}
-          selectedVehicle={selectedVehicle}
-          fares={fares}
-        />
-      </div>
+      {/* Panels - only one visible at a time */}
+      {vehiclePanel && (
+        <div
+          ref={vehiclePanelRef}
+          className="fixed w-full z-30 bottom-0 bg-white py-10 px-3 pt-12 shadow-2xl transition-all duration-300"
+          style={{ borderTopLeftRadius: 24, borderTopRightRadius: 24 }}
+        >
+          <VehicleP
+            setConfirmRidePanel={setConfirmRidePanel}
+            setvehiclePanel={setvehiclePanel}
+            fares={fares}
+            fetchingFares={fetchingFares}
+            setSelectedVehicle={setSelectedVehicle}
+            createRide={createRide}
+          />
+        </div>
+      )}
 
-      <div
-        ref={vehicleFoundRef}
-        className="fixed w-full z-10 bottom-0 bg-white py-6 px-3 pt-12"
-      >
-        <Lookd setVehicleFound={setVehicleFound} />
-      </div>
+      {ConfirmRidePanel && (
+        <div
+          ref={ConfirmRidePanelRef}
+          className="fixed w-full z-30 bottom-0 bg-white py-6 px-3 pt-12 shadow-2xl transition-all duration-300"
+          style={{ borderTopLeftRadius: 24, borderTopRightRadius: 24 }}
+        >
+          <ConfirmRide
+            setConfirmRidePanel={setConfirmRidePanel}
+            setVehicleFound={setVehicleFound}
+            pickup={pickup}
+            destination={destination}
+            selectedVehicle={selectedVehicle}
+            fares={fares}
+            createRide={createRide}
+          />
+        </div>
+      )}
 
-      <div
-        ref={watingForDriverRef}
-        className="fixed w-full z-10 bottom-0 bg-white py-6 px-3 pt-12"
-      >
-        <WaitD waitingForDriver={waitingForDriver} />
-      </div>
+      {VehicleFound && (
+        <div
+          ref={vehicleFoundRef}
+          className="fixed w-full z-30 bottom-0 bg-white py-6 px-3 pt-12 shadow-2xl transition-all duration-300"
+          style={{ borderTopLeftRadius: 24, borderTopRightRadius: 24 }}
+        >
+          <Lookd
+            setVehicleFound={setVehicleFound}
+            pickup={rideDetails?.pickup}
+            destination={rideDetails?.destination}
+            fare={rideDetails?.fare}
+            paymentType={rideDetails?.paymentType}
+          />
+        </div>
+      )}
+
+      {waitingForDriver && (
+        <div
+          ref={watingForDriverRef}
+          className="fixed w-full z-30 bottom-0 bg-white py-6 px-3 pt-12 shadow-2xl transition-all duration-300"
+          style={{ borderTopLeftRadius: 24, borderTopRightRadius: 24 }}
+        >
+          <WaitD waitingForDriver={setwaitingForDriver} />
+        </div>
+      )}
     </div>
   );
 };
