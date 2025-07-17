@@ -1,17 +1,20 @@
-import React, { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/UserContext";
 
 const UserProtect = ({ children }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { user } = useContext(UserContext);
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem("token");
     if (!token) {
-      navigate('/login', { replace: true })
+      navigate("/login", { replace: true });
     }
-  }, [navigate])
+  }, [navigate]);
 
-  return <>{children}</>
-}
+  // Pass user as prop to children if needed
+  return <>{React.cloneElement(children, { user })}</>;
+};
 
-export default UserProtect
+export default UserProtect;

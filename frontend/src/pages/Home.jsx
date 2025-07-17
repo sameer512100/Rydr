@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState,useEffect, useRef, use } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import "remixicon/fonts/remixicon.css";
@@ -8,10 +8,12 @@ import ConfirmRide from "../components/ConfirmRide";
 import Lookd from "../components/Lookd";
 import WaitD from "../components/WaitD";
 import axios from "axios";
+import {SocketContext} from "../context/SocketContext";
+import { UserContext } from "../context/UserContext";
 
 const API_BASE = import.meta.env.VITE_BASE_URL;
 
-const Home = () => {
+const Home = ({user}) => {
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
   const [panelOpen, setpanelOpen] = useState(false);
@@ -38,6 +40,16 @@ const Home = () => {
 
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [rideDetails, setRideDetails] = useState(null);
+
+  const {sendMessage, onMessage} = React.useContext(SocketContext);
+
+  /*useEffect(()=>{
+    sendMessage("join",{userType:"user",userId:user._id})
+  },[sendMessage,user._id])*/
+
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
 
   // Fetch fares from backend
   const fetchFares = async () => {
