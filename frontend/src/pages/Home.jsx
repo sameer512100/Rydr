@@ -43,13 +43,10 @@ const Home = ({user}) => {
 
   const {sendMessage, onMessage} = React.useContext(SocketContext);
 
-  /*useEffect(()=>{
-    sendMessage("join",{userType:"user",userId:user._id})
-  },[sendMessage,user._id])*/
-
   useEffect(() => {
-    console.log(user);
+    sendMessage("join", { usertType: "user", userId: user._id });
   }, [user]);
+    
 
   // Fetch fares from backend
   const fetchFares = async () => {

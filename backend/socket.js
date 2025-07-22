@@ -23,6 +23,8 @@ function initializeSocket(server) {
     // Handle user connection
     socket.on('join',async (data)=>{
       const {userId,userType} = data;
+      console.log(`User ID: ${userId}, User Type: ${userType}`);
+      
       if(userType === 'user') {
         const user = await userModel.findById(userId);
         if (user) {

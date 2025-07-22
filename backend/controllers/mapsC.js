@@ -38,10 +38,17 @@ module.exports.getSuggestions = async (req, res, next) => {
   }
 
   const { input } = req.query;
+  if (!input || input.trim() === "") {
+    return res.status(400).json({ message: "Input query is required" });
+  }
+
   try {
     const suggestions = await mapService.getAutoCompleteSuggestions(input);
     res.status(200).json(suggestions);
   } catch (error) {
-    res.status(500).json({ message: "Unable to fetch suggestions" });
+    console.error("getSuggestions error:", error); // Add this for debugging
+    res
+      .status(500)
+      .json({ message: "Unable to fetch suggestions", error: error.message });
   }
 };
